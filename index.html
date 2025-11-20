@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intrusion Detection</title>
+    <link rel="stylesheet" href="static/style.css">
+    <script>
+        function toggleInputType(inputType) {
+            document.getElementById("input_type").value = inputType;
+
+            const manualSection = document.getElementById("manual-inputs");
+            const presetSection = document.getElementById("preset-samples");
+
+            if (inputType === "manual") {
+                manualSection.style.display = "block";
+                presetSection.style.display = "none";
+            } else {
+                manualSection.style.display = "none";
+                presetSection.style.display = "block";
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Network Intrusion Detection</h1>
+
+        <form method="POST">
+            <input type="hidden" name="input_type" id="input_type" value="manual">
+
+            <!-- Buttons for toggling between manual and preset input -->
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button type="button" onclick="toggleInputType('manual')" class="btn">Manual Input</button>
+                <button type="button" onclick="toggleInputType('preset')" class="btn">Preset Sample</button>
+            </div>
+
+            <!-- Preset Sample Section -->
+            <div id="preset-samples" class="form-section" style="display: none;">
+                <div class="section-title">Choose Attack Type</div>
+                <label for="attack_type">Attack Type:</label>
+                <select name="attack_type" id="attack_type">
+                    {% for attack_type in attack_samples.keys() %}
+                        <option value="{{ attack_type }}" {% if attack_type == selected_attack %}selected{% endif %}>{{ attack_type }}</option>
+                    {% endfor %}
+                </select>
+                <div class="text-center">
+                    <button type="submit" class="btn">Predict</button>
+                </div>
+            </div>
+
+            <!-- Manual Input Section -->
+            <div id="manual-inputs" class="form-section">
+                <div class="section-title">Enter Features Manually</div>
+                <div class="form-row">
+                    {% for feature in features %}
+                        <div class="form-group">
+                            <label>{{ feature }}:</label>
+                            {% if feature == 'Hour' %}
+                                <input type="number" name="{{ feature }}" value="{{ input_values[loop.index0]|default('') }}" min="0" max="23">
+                            {% elif feature == 'Minute' or feature == 'Second' %}
+                                <input type="number" name="{{ feature }}" value="{{ input_values[loop.index0]|default('') }}" min="0" max="59">
+                            {% else %}
+                                <input type="number" step="any" name="{{ feature }}" value="{{ input_values[loop.index0]|default('') }}">
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn">Predict</button>
+                </div>
+            </div>
+        </form>
+
+        {% if prediction %}
+            <div class="prediction">
+                <strong>Prediction:</strong> {{ prediction }}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
